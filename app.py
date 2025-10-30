@@ -11,19 +11,28 @@ CORS(app)
 
 @app.route("/extract", methods=["POST"])
 def extract_vocab():
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
     uploaded_file = request.files["file"]
 
+    print(request.form.get('options'))
     # Create temporary directory to hold input file
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = os.path.join(tmpdir, uploaded_file.filename)
         uploaded_file.save(input_path)
+        options = request.form.get('options')
 
         # Run the extractor in the temp directory
+        # determine file type from uploaded filename extension (fallback to 'auto')
+        _, ext = os.path.splitext(uploaded_file.filename)
+        file_type = ext.lstrip('.').lower() if ext else 'auto'
+        if not file_type:
+            file_type = 'auto'
+
         result = subprocess.run(
-            ["jpvocab-extractor", "--type", "epub", input_path],
+            ["jpvocab-extractor", *options.split() ,"--type", file_type, input_path],
             cwd=tmpdir,  # run command in temp folder
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

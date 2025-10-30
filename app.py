@@ -17,7 +17,6 @@ def extract_vocab():
 
     uploaded_file = request.files["file"]
 
-    print(request.form.get('options'))
     # Create temporary directory to hold input file
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = os.path.join(tmpdir, uploaded_file.filename)
